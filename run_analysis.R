@@ -83,7 +83,9 @@ names(X_train)<-featureLabelsTransform
 # X_test and X_train are ready to go
 ## need to get subject_test and subject_train
 subjectTest<-read.table("./UCI HAR Dataset/test/subject_test.txt")
+names(subjectTest)<-"subject"
 subjectTrain<-read.table("./UCI HAR Dataset/train/subject_train.txt")
+names(subjectTrain)<-"subject"
 # merge testing data (subjectTest,X_test,yTest) on row number (yikes)
 test<-cbind(subjectTest,X_test,yTest)
 # merge training data
@@ -109,6 +111,21 @@ completeProcessed<-complete[,c(1,563,564,565,targetCols)]
 
 ## right idea, need subject and description to be columns
 # head(tapply(completeProcessed[,5],paste(completeProcessed$V1,completeProcessed$activityDescription),mean))
+
+# loop and cbind for mean and std
+testTmp<-NULL
+i = 1
+for(i in 1:nrow(completeProcessed)) {
+    testTmp<-cbind( 
+        #### ohh, double loop time. per row and column. gotcha
+    aggregate(completeProcessed[i,] ~ completeProcessed$subject + completeProcessed$activityDescription,data=completeProcessed,mean),
+    aggregate(completeProcessed[i,] ~ completeProcessed$subject + completeProcessed$activityDescription,data=completeProcessed,sd)
+    )
+    
+    rbind(testTmp,testTmp)
+    
+    i<-i+1
+}
 
 ###
 
