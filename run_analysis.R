@@ -25,38 +25,33 @@ setwd("/Users/rworden/Coursera2/")
 # unzip("runAnalysis.zip")
 ###
 
-### re: (4), label test and train data with activity descriptions
-# input and process activity_labels.txt and y_train.txt
-# add a new column with text label for each numeric label
+### re: (4), label y_test and y_train data with activity descriptions
+# input and process activity_labels.txt
 activityLabels<-read.table("./UCI HAR Dataset/activity_labels.txt")
 names(activityLabel)<-c("activityCode","activityDescription")
 # load y_train.txt 
 # then merge with activityLabels
+# then add a new column with text label for each numeric label
 # TODO should prob throw an error if pre and post row counts differ.
 yTrain<-read.table("./UCI HAR Dataset/train/y_train.txt")
 names(yTrain)<-"activityCode"
 yTrain<-merge(yTrain,activityLabels,by.x="activityCode",by.y="activityCode")
 # load y_test.txt
 # then merge with activityLabels
+# then add a new column with text label for each numeric label
 # TODO should prob throw an error if pre and post row counts differ.
 yTest<-read.table("./UCI HAR Dataset/test/y_test.txt")
 names(yTest)<-"activityCode"
 yTest<-merge(yTest,activityLabels,by.x="activityCode",by.y="activityCode")
 ###
 
-### re:(5), label all features in test and train with labels from features.txt
+### re:(5), label all features in X_test and X_train with labels from features.txt
 ### once this is done, we can merge test->test data and train->train data (subject_*, X_*, y_*)
-### and then append/rbind test and train data into one dataframe
-
+### and then rbind test and train data into one dataframe
 # input and process features.txt
-# TODO(?) remove commas in label names? meh
 featureLabels<-read.table("./UCI HAR Dataset/features.txt")
 featureLabels$V1<-NULL
 colnames(featureLabels)<-"feature"
-#featureLabels$feature<-as.character(featureLabels$feature)
-# why does replacing commas break everything and make it not a vector?
-# replace "," with "|" because wtf would you put commas in a fieldname
-# featureLabels<-gsub("\\,","\\|",featureLabels$feature)
 # turn features.txt into character var separated by quotes and commas for use in names()
 # holy hell, there is probably a much better way to do this
 i<-1
@@ -67,20 +62,15 @@ for(i in i:nrow(featureLabels)) {
     featureLabelsTransform<-rbind(featureLabelsTransform,gsub(" ","",(paste("",as.character(featureLabels[i,]),""))))
     i<-i+1
 }
-# TEST data
-# ingest test data
+# load X_test data and label it with names from featureLabelsTransform
 X_test<-read.table("./UCI HAR Dataset/test/X_test.txt")
-# label each column in X_test.txt with featureLabels
 names(X_test)<-featureLabelsTransform
-# TRAIN data
+# load X_train data and label it with names from featureLabelsTransform
 X_train<-read.table("./UCI HAR Dataset/train/X_train.txt")
-# label each column in X_test.txt with featureLabels
 names(X_train)<-featureLabelsTransform
 ###
 
 ### now, merge merge test->test data and train->train data (subject_*, X_*, y_*)
-# yTrain and yTest are ready to go
-# X_test and X_train are ready to go
 ## need to get subject_test and subject_train
 subjectTest<-read.table("./UCI HAR Dataset/test/subject_test.txt")
 names(subjectTest)<-"subject"
@@ -93,7 +83,7 @@ train<-cbind(subjectTrain,X_train,yTrain)
 ###
 
 ### re:(2), append train and test together
-### first add a var in each for where it came from
+# first, add a var in each for where it came from
 test$testData<-TRUE
 train$testData<-FALSE
 # now, append train and test
@@ -105,27 +95,15 @@ complete<-rbind(test,train)
 targetCols<-grep("(-mean|-std)",colnames(complete))
 # now just get subjectcol, activity columns, and targetColumns:
 completeProcessed<-complete[,c(1,563,564,565,targetCols)]
+# 1 = "subject", 563 = "activityCode", 564 = "activityDescription", 565 = "testData"
 ###
 
 ### Creates a second, independent tidy data set with the average of each variable for each activity and each subject.
-
-## right idea, need subject and description to be columns
-# head(tapply(completeProcessed[,5],paste(completeProcessed$V1,completeProcessed$activityDescription),mean))
-
-# loop and cbind for mean and std
-testTmp<-NULL
-i = 1
-for(i in 1:nrow(completeProcessed)) {
-    testTmp<-cbind( 
-        #### ohh, double loop time. per row and column. gotcha
-    aggregate(completeProcessed[i,] ~ completeProcessed$subject + completeProcessed$activityDescription,data=completeProcessed,mean),
-    aggregate(completeProcessed[i,] ~ completeProcessed$subject + completeProcessed$activityDescription,data=completeProcessed,sd)
-    )
-    
-    rbind(testTmp,testTmp)
-    
-    i<-i+1
-}
-
+# melt everything down to subject, activityDescription
+# start at column 5 because that's where the measurements start
+completeProcessedMelt<-melt(completeProcessed,id=c("subject","activityDescription"),
+                            measure.vars=names(completeProcessed[,5:ncol(completeProcessed)]))
+# cast back out into subject+activityDescription-level data frame
+# and averaged values for everything else
+completeProcessedCast<-dcast(completeProcessedMelt,subject+activityDescription ~ variable,mean)
 ###
-
