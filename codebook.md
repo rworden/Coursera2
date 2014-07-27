@@ -1,8 +1,8 @@
 Coursera CodeBook for "getting and cleaning data"
 
-1: subject length:40 class:integer min:1 max:30 </br>
-2: activityDescription class:factor length: 40 </br>
-	levels:</br>
+1: subject length:40 class:integer min:1 max:30
+2: activityDescription class:factor length: 40
+	levels:
 		LAYING
 		SITTING
 		STANDING
