@@ -115,6 +115,8 @@ names(completeProcessedCast)<-gsub("Acc","Acceleration",names(completeProcessedC
 names(completeProcessedCast)<-gsub("Mag","Magnitude",names(completeProcessedCast))
 names(completeProcessedCast)<-gsub("\\(\\)","",names(completeProcessedCast))
 
+# output tidy data file
+write.table(completeProcessedCast, file="tidyData.csv",sep=",")
 
 #codebook helper
 codeBook<-data.frame()
