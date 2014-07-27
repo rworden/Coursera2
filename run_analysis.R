@@ -10,13 +10,12 @@
 # 1) You should create one R script called run_analysis.R that does the following. 
 # 2) Merges the training and the test sets to create one data set. [DONE]
 # 3) Extracts only the measurements on the mean and standard deviation for each measurement. [DONE]
-# 4) Uses descriptive activity names to name the activities in the data set [TODO]
+# 4) Uses descriptive activity names to name the activities in the data set [DONE]
 # 5) Appropriately labels the data set with descriptive variable names. [DONE]
 # 6) Creates a second, independent tidy data set with the average of each variable for each activity and each subject. [DONE] 
 ###
 
 ### setup
-setwd("/Users/rworden/Coursera2/")
 ###
 
 ### download files initially (run once)
@@ -103,8 +102,9 @@ completeProcessedMelt<-melt(completeProcessed,id=c("subject","activityDescriptio
 completeProcessedCast<-dcast(completeProcessedMelt,subject+activityDescription ~ variable,mean)
 ###
 
-names(completeProcessedCast)<-gsub("^f","force",names(completeProcessedCast))
-names(completeProcessedCast)<-gsub("^t","time",names(completeProcessedCast))
+### prettify up variable names
+names(completeProcessedCast)<-gsub("^f","force-",names(completeProcessedCast))
+names(completeProcessedCast)<-gsub("^t","time-",names(completeProcessedCast))
 names(completeProcessedCast)<-gsub("std","standardDeviation",names(completeProcessedCast))
 names(completeProcessedCast)<-gsub("mean","mean",names(completeProcessedCast))
 names(completeProcessedCast)<-gsub("meanFreq","meanFrequency",names(completeProcessedCast))
@@ -114,4 +114,17 @@ names(completeProcessedCast)<-gsub("Z$","Zaxis",names(completeProcessedCast))
 names(completeProcessedCast)<-gsub("Acc","Acceleration",names(completeProcessedCast))
 names(completeProcessedCast)<-gsub("Mag","Magnitude",names(completeProcessedCast))
 names(completeProcessedCast)<-gsub("\\(\\)","",names(completeProcessedCast))
+
+
+#codebook helper
+codeBook<-data.frame()
+p<-3
+for (p in 3:ncol(completeProcessedCast)) {
+    codeBook[p,1]<-paste(names(completeProcessedCast[p]),"  ",length(completeProcessedCast[,p]),
+                         " ",class(completeProcessedCast[,p]),
+                         " min:",round(min(completeProcessedCast[,p]),3),
+                         " max:",round(max(completeProcessedCast[,p]),3))
+    #codeBook<-rbind(codeBook,codeBookEntry)
+    p<-p+1
+}
 
