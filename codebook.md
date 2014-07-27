@@ -1,6 +1,7 @@
+```{r tidy=FALSE}
 Coursera CodeBook for "getting and cleaning data"
 
-1: subject length:40 class:integer min:1 max:30 /n
+1: subject length:40 class:integer min:1 max:30
 2: activityDescription class:factor length: 40
 	levels:
 		LAYING
@@ -88,3 +89,4 @@ Coursera CodeBook for "getting and cleaning data"
 79: force-BodyGyroJerkMagnitude-mean length: 40 class: numeric min: -0.994 max: -0.253
 80: force-BodyGyroJerkMagnitude-standardDeviation length: 40 class: numeric min: -0.994 max: -0.271
 81: force-BodyGyroJerkMagnitude-meanFrequency length: 40 class: numeric min: -0.008 max: 0.332
+```
