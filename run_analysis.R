@@ -1,18 +1,18 @@
 ### Objectives
 # You will be required to submit: 
-# 1) a tidy data set as described below, 
-# 2) a link to a Github repository with your script for performing the analysis, and 
-# 3) a code book that describes the variables, the data, and any transformations or work that you performed 
-    #to clean up the data called CodeBook.md. 
-# You should also include a README.md in the repo with your scripts. 
+# 1) a tidy data set as described below, [DONE]
+# 2) a link to a Github repository with your script for performing the analysis, and [DONE]
+# 3) a code book that describes the variables, the data, and any transformations or work 
+#   that you performed to clean up the data called CodeBook.md. 
+# You should also include a README.md in the repo with your scripts. [DONE]
 # This repo explains how all of the scripts work and how they are connected.
 
 # 1) You should create one R script called run_analysis.R that does the following. 
 # 2) Merges the training and the test sets to create one data set. [DONE]
 # 3) Extracts only the measurements on the mean and standard deviation for each measurement. [DONE]
-# 4) Uses descriptive activity names to name the activities in the data set [DONE]
+# 4) Uses descriptive activity names to name the activities in the data set [TODO]
 # 5) Appropriately labels the data set with descriptive variable names. [DONE]
-# 6) Creates a second, independent tidy data set with the average of each variable for each activity and each subject. 
+# 6) Creates a second, independent tidy data set with the average of each variable for each activity and each subject. [DONE] 
 ###
 
 ### setup
@@ -32,14 +32,12 @@ names(activityLabel)<-c("activityCode","activityDescription")
 # load y_train.txt 
 # then merge with activityLabels
 # then add a new column with text label for each numeric label
-# TODO should prob throw an error if pre and post row counts differ.
 yTrain<-read.table("./UCI HAR Dataset/train/y_train.txt")
 names(yTrain)<-"activityCode"
 yTrain<-merge(yTrain,activityLabels,by.x="activityCode",by.y="activityCode")
 # load y_test.txt
 # then merge with activityLabels
 # then add a new column with text label for each numeric label
-# TODO should prob throw an error if pre and post row counts differ.
 yTest<-read.table("./UCI HAR Dataset/test/y_test.txt")
 names(yTest)<-"activityCode"
 yTest<-merge(yTest,activityLabels,by.x="activityCode",by.y="activityCode")
@@ -52,14 +50,11 @@ yTest<-merge(yTest,activityLabels,by.x="activityCode",by.y="activityCode")
 featureLabels<-read.table("./UCI HAR Dataset/features.txt")
 featureLabels$V1<-NULL
 colnames(featureLabels)<-"feature"
-# turn features.txt into character var separated by quotes and commas for use in names()
-# holy hell, there is probably a much better way to do this
+# setup for loop
 i<-1
 featureLabelsTransform<-character()
 for(i in i:nrow(featureLabels)) {
-    ## TODO, these "" don't do anything, and moreover, aren't needed. Remove them
-    ## Apparently character() handles everything
-    featureLabelsTransform<-rbind(featureLabelsTransform,gsub(" ","",(paste("",as.character(featureLabels[i,]),""))))
+    featureLabelsTransform<-rbind(featureLabelsTransform,gsub(" ","",(as.character(featureLabels[i,]))))
     i<-i+1
 }
 # load X_test data and label it with names from featureLabelsTransform
@@ -107,3 +102,16 @@ completeProcessedMelt<-melt(completeProcessed,id=c("subject","activityDescriptio
 # and averaged values for everything else
 completeProcessedCast<-dcast(completeProcessedMelt,subject+activityDescription ~ variable,mean)
 ###
+
+names(completeProcessedCast)<-gsub("^f","force",names(completeProcessedCast))
+names(completeProcessedCast)<-gsub("^t","time",names(completeProcessedCast))
+names(completeProcessedCast)<-gsub("std","standardDeviation",names(completeProcessedCast))
+names(completeProcessedCast)<-gsub("mean","mean",names(completeProcessedCast))
+names(completeProcessedCast)<-gsub("meanFreq","meanFrequency",names(completeProcessedCast))
+names(completeProcessedCast)<-gsub("Y$","Yaxis",names(completeProcessedCast))
+names(completeProcessedCast)<-gsub("X$","Xaxis",names(completeProcessedCast))
+names(completeProcessedCast)<-gsub("Z$","Zaxis",names(completeProcessedCast))
+names(completeProcessedCast)<-gsub("Acc","Acceleration",names(completeProcessedCast))
+names(completeProcessedCast)<-gsub("Mag","Magnitude",names(completeProcessedCast))
+names(completeProcessedCast)<-gsub("\\(\\)","",names(completeProcessedCast))
+
